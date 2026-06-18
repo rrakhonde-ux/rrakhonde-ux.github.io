@@ -54,7 +54,27 @@ body {
   font-size: 16px;
   overflow-x: hidden;
 }
+/* ─────────────────────────────────────────
+   Starfield Canvas — behind all content
+   ───────────────────────────────────────── */
+#starfield {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
 
+/* Make sure all content sits above the starfield */
+.nav,
+.hero,
+.section,
+.footer {
+  position: relative;
+  z-index: 1;
+}
 ul {
   list-style: none;
 }
