@@ -44,11 +44,12 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--bg);
 }
 
 body {
   font-family: var(--font-sans);
-  background: var(--bg);
+  background: transparent;
   color: var(--text-primary);
   line-height: 1.6;
   font-size: 16px;
@@ -63,17 +64,45 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
 }
 
-/* Make sure all content sits above the starfield */
+/* ─────────────────────────────────────────
+   Astronaut Canvas — floats above starfield
+   ───────────────────────────────────────── */
+#astronaut-canvas {
+  position: fixed;
+  top: 80px;
+  left: 40px;
+  width: 320px;
+  height: 320px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  #astronaut-canvas {
+    width: 200px;
+    height: 200px;
+    top: 60px;
+    left: 16px;
+  }
+}
+
+/* Layer content above starfield, below astronaut */
 .nav,
 .hero,
 .section,
 .footer {
   position: relative;
   z-index: 1;
+  background: transparent;
+}
+
+/* Hero needs its content centered but background transparent */
+.hero {
+  background: transparent;
 }
 ul {
   list-style: none;

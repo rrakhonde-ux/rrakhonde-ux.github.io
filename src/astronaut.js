@@ -1,0 +1,108 @@
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+
+export function initAstronaut() {
+  const container = document.querySelector('#astronaut-canvas')
+  if (!container) return
+
+  // ─── Scene, Camera, Renderer ───
+  const scene = new THREE.Scene()
+
+  const camera = new THREE.PerspectiveCamera(
+    35,
+    container.clientWidth / container.clientHeight,
+    0.1,
+    100
+  )
+  camera.position.set(0, 0, 5)
+
+  const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    alpha: true,
+  })
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  renderer.setSize(container.clientWidth, container.clientHeight)
+  renderer.outputColorSpace = THREE.SRGBColorSpace
+  container.appendChild(renderer.domElement)
+
+  // ─── Lights ───
+  const ambient = new THREE.AmbientLight(0xffffff, 0.6)
+  scene.add(ambient)
+
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.2)
+  keyLight.position.set(3, 4, 5)
+  scene.add(keyLight)
+
+  const rimLight = new THREE.DirectionalLight(0x8b5cf6, 0.6)
+  rimLight.position.set(-3, 2, -3)
+  scene.add(rimLight)
+
+  // ─── Load the astronaut ───
+  const loader = new GLTFLoader()
+  let astronaut = null
+  let mixer = null
+
+  loader.load(
+    '/astronaut.glb',
+    (gltf) => {
+      astronaut = gltf.scene
+
+      // Center the model
+      const box = new THREE.Box3().setFromObject(astronaut)
+      const center = box.getCenter(new THREE.Vector3())
+      astronaut.position.sub(center)
+
+      // Scale to fit nicely
+      const size = box.getSize(new THREE.Vector3())
+      const maxDim = Math.max(size.x, size.y, size.z)
+      const scale = 2.5 / maxDim
+      astronaut.scale.setScalar(scale)
+
+      scene.add(astronaut)
+
+      // ─── Play the floating animation ───
+      mixer = new THREE.AnimationMixer(astronaut)
+      const floatingClip = gltf.animations.find(clip => clip.name === 'floating')
+      if (floatingClip) {
+        const action = mixer.clipAction(floatingClip)
+        action.play()
+        console.log('✅ Astronaut loaded and floating')
+      } else {
+        console.log('⚠️ Floating animation not found, falling back to static')
+      }
+    },
+    (progress) => {
+      const percent = (progress.loaded / progress.total) * 100
+      console.log(`Loading astronaut: ${percent.toFixed(0)}%`)
+    },
+    (error) => {
+      console.error('❌ Astronaut failed to load:', error)
+    }
+  )
+
+  // ─── Resize handler ───
+  window.addEventListener('resize', () => {
+    if (!container) return
+    camera.aspect = container.clientWidth / container.clientHeight
+    camera.updateProjectionMatrix()
+    renderer.setSize(container.clientWidth, container.clientHeight)
+  })
+
+  // ─── Animation loop ───
+  const clock = new THREE.Clock()
+
+  function animate() {
+    requestAnimationFrame(animate)
+
+    const delta = clock.getDelta()
+
+    // Drive the animation mixer
+    if (mixer) {
+      mixer.update(delta)
+    }
+
+    renderer.render(scene, camera)
+  }
+
+  animate()
+}
