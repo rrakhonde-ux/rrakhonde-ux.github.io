@@ -42,6 +42,10 @@ export function initAstronaut() {
   let astronaut = null
   let mixer = null
 
+  // Mouse tracking — target is where cursor is, current eases toward it
+  const mouseTarget = { x: 0, y: 0 }
+  const mouseCurrent = { x: 0, y: 0 }
+
   loader.load(
     '/astronaut.glb',
     (gltf) => {
@@ -79,6 +83,12 @@ export function initAstronaut() {
       console.error('❌ Astronaut failed to load:', error)
     }
   )
+    // ─── Mouse tracking ───
+  window.addEventListener('mousemove', (e) => {
+    // Convert screen position to -1..+1 range
+    mouseTarget.x = (e.clientX / window.innerWidth - 0.5) * 2
+    mouseTarget.y = (e.clientY / window.innerHeight - 0.5) * 2
+  })
 
   // ─── Resize handler ───
   window.addEventListener('resize', () => {
@@ -96,9 +106,21 @@ export function initAstronaut() {
 
     const delta = clock.getDelta()
 
-    // Drive the animation mixer
+    // Drive the floating animation
     if (mixer) {
       mixer.update(delta)
+    }
+
+    // Smooth ease cursor position (lag-follow)
+    mouseCurrent.x += (mouseTarget.x - mouseCurrent.x) * 0.05
+    mouseCurrent.y += (mouseTarget.y - mouseCurrent.y) * 0.05
+
+    // Astronaut subtly turns toward cursor
+    if (astronaut) {
+      // Y rotation = looking left/right based on cursor X
+      astronaut.rotation.y = mouseCurrent.x * 0.8
+      // X rotation = looking up/down based on cursor Y (inverted because screen Y is flipped)
+      astronaut.rotation.x = -mouseCurrent.y * 0.4
     }
 
     renderer.render(scene, camera)
