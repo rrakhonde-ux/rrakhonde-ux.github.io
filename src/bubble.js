@@ -112,6 +112,12 @@ function showMessage(text) {
   const bubble = document.querySelector('#speech-bubble')
   const textEl = bubble.querySelector('.bubble-text')
 
+  // Trigger photo reveal when "Meet Ritesh" line plays
+  if (text.startsWith('Meet Ritesh')) {
+    const slot = document.querySelector('#hero-photo-slot')
+    if (slot) slot.classList.add('revealed')
+  }
+
   // Record in history
   history.push(text)
   historyIndex = history.length - 1

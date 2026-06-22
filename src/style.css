@@ -73,21 +73,37 @@ body {
    ───────────────────────────────────────── */
 #astronaut-canvas {
   position: fixed;
-  top: 80px;
-  left: 40px;
-  width: 320px;
-  height: 320px;
-  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 260px;
+  z-index: 50;
   pointer-events: auto;
   cursor: default;
+  transform: translate(-120%, 0);
+  transition: transform 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+#astronaut-canvas.arrived {
+  transform: translate(40px, 80px);
+}
+
+#astronaut-canvas.wandering {
+  transition: none;
 }
 
 @media (max-width: 768px) {
   #astronaut-canvas {
-    width: 200px;
-    height: 200px;
-    top: 60px;
-    left: 16px;
+    width: 180px;
+    height: 180px;
+  }
+}
+
+@media (max-width: 500px) {
+  #astronaut-canvas {
+    width: 140px;
+    height: 140px;
   }
 }
 
@@ -292,9 +308,10 @@ a {
    ───────────────────────────────────────── */
 .speech-bubble {
   position: fixed;
-  top: 100px;
-  left: 380px;
+  top: 0;
+  left: 0;
   max-width: 320px;
+  will-change: transform;
   padding: 14px 38px 14px 18px;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(16px) saturate(140%);
@@ -307,15 +324,13 @@ a {
   font-weight: 400;
   z-index: 200;
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.35s ease, transform 0.35s ease;
+   transition: opacity 0.35s ease;
   pointer-events: none;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
 .speech-bubble.visible {
   opacity: 1;
-  transform: translateY(0);
   pointer-events: auto;
 }
 
@@ -413,9 +428,66 @@ a {
 
 @media (max-width: 768px) {
   .speech-bubble {
-    left: 232px;
-    top: 80px;
-    max-width: calc(100vw - 248px);
+    max-width: 240px;
+  }
+}
+
+@media (max-width: 500px) {
+  .speech-bubble {
+    max-width: 180px;
     font-size: 13px;
   }
+}
+
+/* ─── Hero photo slot (projector reveal) ─── */
+.hero-photo-slot {
+  width: 200px;
+  height: 200px;
+  margin: 24px auto;
+  position: relative;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-photo-slot.revealed {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.hero-photo-halo {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, rgba(236, 72, 153, 0.15) 40%, transparent 70%);
+  filter: blur(8px);
+  animation: halo-pulse 4s ease-in-out infinite;
+}
+
+.hero-photo-placeholder {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: url('/ritesh_square.png') center/cover no-repeat;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes halo-pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* ─── Astronaut slide-in entry ─── */
+#astronaut-canvas {
+  transform: translateX(-120%);
+  transition: transform 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#astronaut-canvas.arrived {
+  transform: translateX(0);
 }

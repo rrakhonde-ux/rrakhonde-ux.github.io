@@ -67,13 +67,16 @@ export function initAstronaut() {
 
       // ─── Play the floating animation ───
       mixer = new THREE.AnimationMixer(astronaut)
+      // Try idle first (more limb movement), fall back to floating
+      const idleClip = gltf.animations.find(clip => clip.name === 'idle')
       const floatingClip = gltf.animations.find(clip => clip.name === 'floating')
-      if (floatingClip) {
-        const action = mixer.clipAction(floatingClip)
+      const clip = idleClip || floatingClip
+      if (clip) {
+        const action = mixer.clipAction(clip)
         action.play()
-        console.log('✅ Astronaut loaded and floating')
+        console.log(`✅ Astronaut loaded, playing: ${clip.name}`)
       } else {
-        console.log('⚠️ Floating animation not found, falling back to static')
+        console.log('⚠️ No animation clip found')
       }
 
       resolve()
