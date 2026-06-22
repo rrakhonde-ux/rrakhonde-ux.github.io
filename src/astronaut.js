@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 export function initAstronaut() {
+  return new Promise((resolve) => {
   const container = document.querySelector('#astronaut-canvas')
   if (!container) return
 
@@ -74,6 +75,8 @@ export function initAstronaut() {
       } else {
         console.log('⚠️ Floating animation not found, falling back to static')
       }
+
+      resolve()
     },
     (progress) => {
       const percent = (progress.loaded / progress.total) * 100
@@ -127,4 +130,5 @@ export function initAstronaut() {
   }
 
   animate()
+  })
 }
