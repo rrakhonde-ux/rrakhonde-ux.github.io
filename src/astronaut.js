@@ -46,6 +46,7 @@ export function initAstronaut() {
   // Mouse tracking — target is where cursor is, current eases toward it
   const mouseTarget = { x: 0, y: 0 }
   const mouseCurrent = { x: 0, y: 0 }
+  let lookOverride = null  // {x, y} in -1..1 range to force gaze at a fixed point
 
   loader.load(
     '/astronaut.glb',
@@ -117,9 +118,11 @@ export function initAstronaut() {
       mixer.update(delta)
     }
 
-    // Smooth ease cursor position (lag-follow)
-    mouseCurrent.x += (mouseTarget.x - mouseCurrent.x) * 0.05
-    mouseCurrent.y += (mouseTarget.y - mouseCurrent.y) * 0.05
+    // If lookOverride is set (e.g. hovering a capability star), aim there instead of cursor
+    const tx = lookOverride ? lookOverride.x : mouseTarget.x
+    const ty = lookOverride ? lookOverride.y : mouseTarget.y
+    mouseCurrent.x += (tx - mouseCurrent.x) * 0.05
+    mouseCurrent.y += (ty - mouseCurrent.y) * 0.05
 
     // Astronaut subtly turns toward cursor
     if (astronaut) {
@@ -133,5 +136,17 @@ export function initAstronaut() {
   }
 
   animate()
+
+  // Expose a method for external code to override gaze direction
+  window.__astronautLookAt = (screenX, screenY) => {
+    if (screenX === null) {
+      lookOverride = null
+      return
+    }
+    lookOverride = {
+      x: (screenX / window.innerWidth - 0.5) * 2,
+      y: (screenY / window.innerHeight - 0.5) * 2,
+    }
+  }
   })
 }
