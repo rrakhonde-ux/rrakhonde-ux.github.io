@@ -95,15 +95,16 @@ body {
 
 @media (max-width: 768px) {
   #astronaut-canvas {
-    width: 180px;
-    height: 180px;
+    width: 130px;
+    height: 130px;
+    cursor: default;
   }
 }
 
 @media (max-width: 500px) {
   #astronaut-canvas {
-    width: 140px;
-    height: 140px;
+    width: 110px;
+    height: 110px;
   }
 }
 
@@ -144,10 +145,20 @@ a {
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 2.5rem;
-  background: rgba(5, 6, 15, 0.6);
+  background: rgba(5, 6, 15, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
+}
+
+@media (max-width: 768px) {
+  .nav {
+    background: #05060f;
+    padding: 0.875rem 1rem;
+  }
+  .nav-links {
+    gap: 1rem;
+  }
 }
 
 .nav-logo {
@@ -511,19 +522,34 @@ a {
   position: absolute;
   top: 40%;
   left: 50%;
-  width: 210px;
-  padding: 20px 18px 18px;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border: 0.5px solid rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  width: 220px;
+  padding: 28px 22px 22px;
+  background: linear-gradient(180deg, rgba(20, 22, 38, 0.92) 0%, rgba(12, 14, 26, 0.94) 100%);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  text-align: left;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
   will-change: transform, opacity;
   transform-origin: center center;
   pointer-events: none;
+  overflow: hidden;
 }
+
+/* Accent line at top of card in star's color */
+.cap-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.cap-card[data-color="blue"]::before { background: linear-gradient(90deg, transparent, #6ab8ff, transparent); }
+.cap-card[data-color="gold"]::before { background: linear-gradient(90deg, transparent, #ffc858, transparent); }
+.cap-card[data-color="purple"]::before { background: linear-gradient(90deg, transparent, #b591ff, transparent); }
+.cap-card[data-color="green"]::before { background: linear-gradient(90deg, transparent, #7fdc7f, transparent); }
+.cap-card[data-color="pink"]::before { background: linear-gradient(90deg, transparent, #ff9ec7, transparent); }
 
 /* Star is its own element, lifted above the card */
 .cap-card-dot {
@@ -573,22 +599,90 @@ a {
 }
 
 .cap-card-title {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 6px;
+  font-family: 'Georgia', 'Cambria', 'Times New Roman', serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #f0ece4;
+  margin: 0 0 10px;
+  line-height: 1.25;
 }
 
 .cap-card-desc {
-  font-size: 0.78rem;
-  color: var(--text-secondary);
+  font-size: 0.82rem;
+  color: rgba(240, 236, 228, 0.65);
   margin: 0;
-  line-height: 1.45;
+  line-height: 1.55;
+  letter-spacing: 0.005em;
 }
 
 @media (max-width: 768px) {
-  .capability-carousel { height: 320px; }
-  .cap-card { width: 180px; padding: 16px 14px; }
-  .cap-card-title { font-size: 0.85rem; }
-  .cap-card-desc { font-size: 0.72rem; }
+  /* Mobile carousel: one card at a time, swipeable */
+  .capability-carousel {
+    height: 320px;
+    padding: 40px 0 24px;
+    cursor: grab;
+    overflow: hidden;
+    perspective: none;
+  }
+  .cap-card {
+    width: 78%;
+    max-width: 280px;
+    padding: 30px 24px 24px;
+  }
+  .cap-card-title { font-size: 1.05rem; }
+  .cap-card-desc { font-size: 0.82rem; }
+
+  /* Dots indicator */
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .carousel-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  .carousel-dot.active {
+    background: rgba(255, 255, 255, 0.85);
+    transform: scale(1.3);
+  }
+}
+/* ─── Mobile hero photo: smaller, no shift, always visible ─── */
+@media (max-width: 768px) {
+  .hero-photo-slot {
+    width: 120px;
+    height: 120px;
+    margin: 16px auto 12px;
+    opacity: 1;
+    transform: none;
+  }
+  .hero-photo-placeholder {
+    width: 120px;
+    height: 120px;
+  }
+  .hero-photo-halo {
+    inset: -12px;
+  }
+}
+
+/* ─── Mobile hero typography ─── */
+@media (max-width: 768px) {
+  .hero-eyebrow { font-size: 1rem; }
+  .hero-name { font-size: 2.25rem; line-height: 1.1; }
+  .hero-tagline { font-size: 1.125rem; }
+  .hero-intro { font-size: 0.95rem; }
+  .section-title { font-size: 1.75rem; }
+  .section-body { font-size: 1rem; }
+}
+
+/* ─── Mobile bubble: position above astronaut not beside ─── */
+@media (max-width: 768px) {
+  .speech-bubble {
+    max-width: calc(100vw - 32px);
+  }
 }

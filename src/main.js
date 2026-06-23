@@ -14,6 +14,7 @@ initAstronaut().then(() => {
   }
 
   setTimeout(() => {
+    if (window.innerWidth <= 768) return  // No bubble on mobile
     say([
       "Hello. I'm here to introduce someone.",
       "Meet Ritesh. Fourteen years of bridging design and business strategy.",
@@ -25,13 +26,25 @@ initAstronaut().then(() => {
 
 // ─── Wandering motion: Lissajous within safe bounds + drag-to-move ───
 function startWandering(canvas) {
+  let dropAnchor = null
+
   const getSize = () => {
-    if (window.innerWidth <= 500) return 140
-    if (window.innerWidth <= 768) return 180
+    if (window.innerWidth <= 500) return 110
+    if (window.innerWidth <= 768) return 130
     return 260
   }
   let SIZE = getSize()
   window.addEventListener('resize', () => { SIZE = getSize() })
+
+  const isMobile = () => window.innerWidth <= 768
+
+  // On mobile, start astronaut anchored to bottom-right
+  if (isMobile()) {
+    dropAnchor = {
+      x: window.innerWidth - SIZE - 12,
+      y: window.innerHeight - SIZE - 12,
+    }
+  }
 
   const TOP_GUARD = 80
   let t = 0
@@ -40,41 +53,71 @@ function startWandering(canvas) {
   const ay = 0.0005 + Math.random() * 0.0003
   const phase = Math.random() * Math.PI * 2
 
-  // ─── Drag-to-move astronaut ───
+  // ─── Drag-to-move astronaut (mouse + touch, with mobile corner-snap) ───
   let astroDragging = false
   let astroDragOffset = { x: 0, y: 0 }
   let astroDragPos = null
 
-  canvas.addEventListener('mousedown', (e) => {
+  const startDrag = (clientX, clientY) => {
     astroDragging = true
     const rect = canvas.getBoundingClientRect()
-    astroDragOffset.x = e.clientX - rect.left
-    astroDragOffset.y = e.clientY - rect.top
-    canvas.style.cursor = 'grabbing'
-    e.preventDefault()
-  })
+    astroDragOffset.x = clientX - rect.left
+    astroDragOffset.y = clientY - rect.top
+    if (!isMobile()) canvas.style.cursor = 'grabbing'
+  }
 
-  window.addEventListener('mousemove', (e) => {
+  const moveDrag = (clientX, clientY) => {
     if (!astroDragging) return
     astroDragPos = {
-      x: e.clientX - astroDragOffset.x,
-      y: e.clientY - astroDragOffset.y,
+      x: clientX - astroDragOffset.x,
+      y: clientY - astroDragOffset.y,
     }
-  })
+  }
 
-  let dropAnchor = null  // {x, y} — where astronaut was dropped; wander offsets from here
-
-  window.addEventListener('mouseup', () => {
+  const endDrag = () => {
     if (!astroDragging) return
     astroDragging = false
-    canvas.style.cursor = 'grab'
+    if (!isMobile()) canvas.style.cursor = 'grab'
 
-    // Anchor wander motion to drop point
     if (astroDragPos) {
-      dropAnchor = { x: astroDragPos.x, y: astroDragPos.y }
+      if (isMobile()) {
+        // Snap to nearest corner on mobile
+        const vw = window.innerWidth
+        const vh = window.innerHeight
+        const PAD = 12
+        const left = astroDragPos.x < vw / 2
+        const top = astroDragPos.y < vh / 2
+        dropAnchor = {
+          x: left ? PAD : vw - SIZE - PAD,
+          y: top ? 80 : vh - SIZE - PAD,
+        }
+      } else {
+        dropAnchor = { x: astroDragPos.x, y: astroDragPos.y }
+      }
     }
     astroDragPos = null
+  }
+
+  // Mouse
+  canvas.addEventListener('mousedown', (e) => {
+    startDrag(e.clientX, e.clientY)
+    e.preventDefault()
   })
+  window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY))
+  window.addEventListener('mouseup', endDrag)
+
+  // Touch
+  canvas.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 0) return
+    startDrag(e.touches[0].clientX, e.touches[0].clientY)
+    e.preventDefault()
+  }, { passive: false })
+  window.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 0) return
+    moveDrag(e.touches[0].clientX, e.touches[0].clientY)
+  }, { passive: true })
+  window.addEventListener('touchend', endDrag)
+  window.addEventListener('touchcancel', endDrag)
 
   function frame() {
     t += 1
@@ -184,9 +227,17 @@ function startCapabilityCarousel() {
   if (!carousel) return
   const cards = Array.from(carousel.querySelectorAll('.cap-card'))
   const total = cards.length
+  const isMobileLayout = () => window.innerWidth <= 768
 
+  // ─── Mobile: swipe carousel ───
+  if (isMobileLayout()) {
+    runMobileCarousel(carousel, cards, total)
+    return
+  }
+
+  // ─── Desktop: merry-go-round arc ───
   const CYCLE_MS = 40000
-  const FRONT_BAND = 0.92
+  const FRONT_BAND = 1.0
   const ARC_HEIGHT = 90
   const ARC_WIDTH_FACTOR = 0.42
 
@@ -217,33 +268,16 @@ function startCapabilityCarousel() {
     carousel.classList.remove('grabbing')
   })
 
-  carousel.addEventListener('touchstart', (e) => {
-    isDragging = true
-    dragStartX = e.touches[0].clientX
-  }, { passive: true })
-
-  window.addEventListener('touchmove', (e) => {
-    if (!isDragging) return
-    const dx = e.touches[0].clientX - dragStartX
-    dragStartX = e.touches[0].clientX
-    dragDelta -= dx / carousel.clientWidth
-  }, { passive: true })
-
-  window.addEventListener('touchend', () => { isDragging = false })
-
   function frame(now) {
     const delta = now - lastTime
     lastTime = now
 
-    if (!isDragging) {
-      progress += delta / CYCLE_MS
-    }
+    if (!isDragging) progress += delta / CYCLE_MS
     progress += dragDelta
     dragDelta = 0
     progress = ((progress % 1) + 1) % 1
 
     const w = carousel.clientWidth
-
     let frontIndex = -1
     let frontProximity = Infinity
 
@@ -262,13 +296,9 @@ function startCapabilityCarousel() {
         scale = 0.85 + (1 - Math.abs(u)) * 0.15
 
         const edgeFade = 0.04
-        if (frontT < edgeFade) {
-          opacity = frontT / edgeFade
-        } else if (frontT > 1 - edgeFade) {
-          opacity = (1 - frontT) / edgeFade
-        } else {
-          opacity = 1
-        }
+        if (frontT < edgeFade) opacity = frontT / edgeFade
+        else if (frontT > 1 - edgeFade) opacity = (1 - frontT) / edgeFade
+        else opacity = 1
 
         const proximity = Math.abs(u)
         if (proximity < frontProximity) {
@@ -288,9 +318,7 @@ function startCapabilityCarousel() {
     })
 
     if (frontIndex !== lastFrontIndex) {
-      cards.forEach((card, i) => {
-        card.classList.toggle('is-front', i === frontIndex)
-      })
+      cards.forEach((card, i) => card.classList.toggle('is-front', i === frontIndex))
       lastFrontIndex = frontIndex
     }
 
@@ -310,12 +338,105 @@ function startCapabilityCarousel() {
     requestAnimationFrame(frame)
   }
 
-  const releaseGazeIfOutOfView = () => {
-    const rect = carousel.getBoundingClientRect()
-    const inView = rect.bottom > 0 && rect.top < window.innerHeight
-    if (!inView && window.__astronautLookAt) window.__astronautLookAt(null)
-  }
-  window.addEventListener('scroll', releaseGazeIfOutOfView, { passive: true })
-
   requestAnimationFrame(frame)
+}
+
+// ─── Mobile swipe carousel ───
+function runMobileCarousel(carousel, cards, total) {
+  const dotsContainer = document.querySelector('#carousel-dots')
+  if (dotsContainer) {
+    dotsContainer.innerHTML = ''
+    cards.forEach((_, i) => {
+      const d = document.createElement('div')
+      d.className = 'carousel-dot' + (i === 0 ? ' active' : '')
+      dotsContainer.appendChild(d)
+    })
+  }
+  const dots = Array.from(document.querySelectorAll('.carousel-dot'))
+
+  const AUTO_MS = 4500
+  const PAUSE_AFTER_SWIPE_MS = 8000
+
+  let activeIndex = 0
+  let lastAutoTime = performance.now()
+  let manualPauseUntil = 0
+  let touchStartX = 0
+  let touchActive = false
+
+  // Position cards: active centered, others off-screen
+  function layout() {
+    cards.forEach((card, i) => {
+      let offset = i - activeIndex
+      // Wrap so we always go the short way
+      if (offset > total / 2) offset -= total
+      if (offset < -total / 2) offset += total
+
+      const x = offset * 110  // % of card width
+      const opacity = Math.abs(offset) > 1 ? 0 : (1 - Math.abs(offset) * 0.7)
+      const scale = 1 - Math.abs(offset) * 0.08
+
+      card.style.position = 'absolute'
+      card.style.top = '50%'
+      card.style.left = '50%'
+      card.style.transform = `translate(-50%, -50%) translateX(${x}%) scale(${scale})`
+      card.style.opacity = opacity
+      card.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease'
+      card.style.zIndex = offset === 0 ? 10 : 5
+    })
+    dots.forEach((d, i) => d.classList.toggle('active', i === activeIndex))
+  }
+
+  function next() {
+    activeIndex = (activeIndex + 1) % total
+    layout()
+  }
+
+  function prev() {
+    activeIndex = (activeIndex - 1 + total) % total
+    layout()
+  }
+
+  carousel.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX
+    touchActive = true
+  }, { passive: true })
+
+  carousel.addEventListener('touchend', (e) => {
+    if (!touchActive) return
+    touchActive = false
+    const dx = e.changedTouches[0].clientX - touchStartX
+    if (Math.abs(dx) > 40) {
+      if (dx < 0) next()
+      else prev()
+      manualPauseUntil = performance.now() + PAUSE_AFTER_SWIPE_MS
+    }
+  })
+
+  // Mouse drag for testing on desktop emulator
+  carousel.addEventListener('mousedown', (e) => {
+    touchStartX = e.clientX
+    touchActive = true
+  })
+
+  carousel.addEventListener('mouseup', (e) => {
+    if (!touchActive) return
+    touchActive = false
+    const dx = e.clientX - touchStartX
+    if (Math.abs(dx) > 40) {
+      if (dx < 0) next()
+      else prev()
+      manualPauseUntil = performance.now() + PAUSE_AFTER_SWIPE_MS
+    }
+  })
+
+  function tick(now) {
+    if (now > manualPauseUntil && now - lastAutoTime > AUTO_MS) {
+      next()
+      lastAutoTime = now
+    }
+    requestAnimationFrame(tick)
+  }
+
+  layout()
+  requestAnimationFrame(tick)
 }
