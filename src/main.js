@@ -227,19 +227,15 @@ function startCapabilityCarousel() {
   if (!carousel) return
   const cards = Array.from(carousel.querySelectorAll('.cap-card'))
   const total = cards.length
-  const isMobileLayout = () => window.innerWidth <= 768
 
-  // ─── Mobile: swipe carousel ───
-  if (isMobileLayout()) {
-    runMobileCarousel(carousel, cards, total)
-    return
-  }
+  // Mobile uses native CSS scroll-snap. No JS needed.
+  if (window.innerWidth <= 768) return
 
   // ─── Desktop: merry-go-round arc ───
   const CYCLE_MS = 40000
   const FRONT_BAND = 1.0
   const ARC_HEIGHT = 90
-  const ARC_WIDTH_FACTOR = 0.42
+  const ARC_WIDTH_FACTOR = 0.55
 
   let lastTime = performance.now()
   let progress = 0
@@ -339,104 +335,4 @@ function startCapabilityCarousel() {
   }
 
   requestAnimationFrame(frame)
-}
-
-// ─── Mobile swipe carousel ───
-function runMobileCarousel(carousel, cards, total) {
-  const dotsContainer = document.querySelector('#carousel-dots')
-  if (dotsContainer) {
-    dotsContainer.innerHTML = ''
-    cards.forEach((_, i) => {
-      const d = document.createElement('div')
-      d.className = 'carousel-dot' + (i === 0 ? ' active' : '')
-      dotsContainer.appendChild(d)
-    })
-  }
-  const dots = Array.from(document.querySelectorAll('.carousel-dot'))
-
-  const AUTO_MS = 4500
-  const PAUSE_AFTER_SWIPE_MS = 8000
-
-  let activeIndex = 0
-  let lastAutoTime = performance.now()
-  let manualPauseUntil = 0
-  let touchStartX = 0
-  let touchActive = false
-
-  // Position cards: active centered, others off-screen
-  function layout() {
-    cards.forEach((card, i) => {
-      let offset = i - activeIndex
-      // Wrap so we always go the short way
-      if (offset > total / 2) offset -= total
-      if (offset < -total / 2) offset += total
-
-      const x = offset * 110  // % of card width
-      const opacity = Math.abs(offset) > 1 ? 0 : (1 - Math.abs(offset) * 0.7)
-      const scale = 1 - Math.abs(offset) * 0.08
-
-      card.style.position = 'absolute'
-      card.style.top = '50%'
-      card.style.left = '50%'
-      card.style.transform = `translate(-50%, -50%) translateX(${x}%) scale(${scale})`
-      card.style.opacity = opacity
-      card.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease'
-      card.style.zIndex = offset === 0 ? 10 : 5
-    })
-    dots.forEach((d, i) => d.classList.toggle('active', i === activeIndex))
-  }
-
-  function next() {
-    activeIndex = (activeIndex + 1) % total
-    layout()
-  }
-
-  function prev() {
-    activeIndex = (activeIndex - 1 + total) % total
-    layout()
-  }
-
-  carousel.addEventListener('touchstart', (e) => {
-    touchStartX = e.touches[0].clientX
-    touchActive = true
-  }, { passive: true })
-
-  carousel.addEventListener('touchend', (e) => {
-    if (!touchActive) return
-    touchActive = false
-    const dx = e.changedTouches[0].clientX - touchStartX
-    if (Math.abs(dx) > 40) {
-      if (dx < 0) next()
-      else prev()
-      manualPauseUntil = performance.now() + PAUSE_AFTER_SWIPE_MS
-    }
-  })
-
-  // Mouse drag for testing on desktop emulator
-  carousel.addEventListener('mousedown', (e) => {
-    touchStartX = e.clientX
-    touchActive = true
-  })
-
-  carousel.addEventListener('mouseup', (e) => {
-    if (!touchActive) return
-    touchActive = false
-    const dx = e.clientX - touchStartX
-    if (Math.abs(dx) > 40) {
-      if (dx < 0) next()
-      else prev()
-      manualPauseUntil = performance.now() + PAUSE_AFTER_SWIPE_MS
-    }
-  })
-
-  function tick(now) {
-    if (now > manualPauseUntil && now - lastAutoTime > AUTO_MS) {
-      next()
-      lastAutoTime = now
-    }
-    requestAnimationFrame(tick)
-  }
-
-  layout()
-  requestAnimationFrame(tick)
 }

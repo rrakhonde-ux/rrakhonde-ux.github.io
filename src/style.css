@@ -324,9 +324,9 @@ a {
   max-width: 320px;
   will-change: transform;
   padding: 14px 38px 14px 18px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  background: rgba(15, 17, 30, 0.35);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
   border: 0.5px solid rgba(255, 255, 255, 0.18);
   color: #f5f5f7;
   border-radius: 18px;
@@ -452,16 +452,15 @@ a {
 
 /* ─── Hero photo slot (projector reveal) ─── */
 .hero-photo-slot {
-  width: 200px;
-  height: 200px;
+  width: 286px;
+  height: 286px;
   margin: 24px auto;
   position: relative;
   opacity: 0;
   transform: scale(0.7);
   transition: opacity 0.8s ease, transform 0.8s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
 }
 
 .hero-photo-slot.revealed {
@@ -469,28 +468,64 @@ a {
   transform: scale(1);
 }
 
-.hero-photo-halo {
+/* Outer ring — solid, slow forward spin */
+.hero-photo-ring-outer {
   position: absolute;
-  inset: -20px;
+  width: 286px;
+  height: 286px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, rgba(236, 72, 153, 0.15) 40%, transparent 70%);
-  filter: blur(8px);
-  animation: halo-pulse 4s ease-in-out infinite;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  animation: ring-spin 60s linear infinite;
 }
 
+/* Inner ring — dashed, faster reverse spin */
+.hero-photo-ring-inner {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  border: 1px dashed rgba(167, 123, 255, 0.18);
+  animation: ring-spin 40s linear infinite reverse;
+}
+
+/* Soft glow halo behind photo */
+.hero-photo-halo {
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  filter: blur(50px);
+  background: radial-gradient(circle, rgba(167, 123, 255, 0.28), transparent 65%);
+}
+
+/* Floater wrapper — everything inside floats together */
+.hero-photo-floater {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  animation: astro-float 9s ease-in-out infinite;
+}
+
+/* The photo itself — no float (parent does it) */
 .hero-photo-placeholder {
+  position: relative;
+  z-index: 2;
   width: 200px;
   height: 200px;
   border-radius: 50%;
   background: url('/ritesh_square.png') center/cover no-repeat;
   border: 1px solid rgba(139, 92, 246, 0.4);
-  position: relative;
-  z-index: 1;
 }
 
-@keyframes halo-pulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
+@keyframes ring-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes astro-float {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-18px) rotate(2deg); }
 }
 
 /* ─── Astronaut slide-in entry ─── */
@@ -508,7 +543,7 @@ a {
   width: 100%;
   height: 360px;
   margin-top: 32px;
-  overflow: hidden;
+  overflow: visible;
   perspective: 1200px;
   cursor: grab;
   user-select: none;
@@ -532,7 +567,6 @@ a {
   will-change: transform, opacity;
   transform-origin: center center;
   pointer-events: none;
-  overflow: hidden;
 }
 
 /* Accent line at top of card in star's color */
@@ -655,18 +689,30 @@ a {
 /* ─── Mobile hero photo: smaller, no shift, always visible ─── */
 @media (max-width: 768px) {
   .hero-photo-slot {
-    width: 120px;
-    height: 120px;
+    width: 180px;
+    height: 180px;
     margin: 16px auto 12px;
     opacity: 1;
     transform: none;
+    display: grid;
+    place-items: center;
   }
-  .hero-photo-placeholder {
-    width: 120px;
-    height: 120px;
+  .hero-photo-ring-outer {
+    width: 180px;
+    height: 180px;
+  }
+  .hero-photo-ring-inner {
+    width: 140px;
+    height: 140px;
   }
   .hero-photo-halo {
-    inset: -12px;
+    width: 150px;
+    height: 150px;
+    inset: auto;
+  }
+  .hero-photo-placeholder {
+    width: 130px;
+    height: 130px;
   }
 }
 
@@ -685,4 +731,62 @@ a {
   .speech-bubble {
     max-width: calc(100vw - 32px);
   }
+}
+/* ─── Capability card icon ─── */
+.cap-card-icon {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  width: 22px;
+  height: 22px;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.cap-card[data-color="blue"] .cap-card-icon { color: #6ab8ff; }
+.cap-card[data-color="gold"] .cap-card-icon { color: #ffc858; }
+.cap-card[data-color="purple"] .cap-card-icon { color: #b591ff; }
+.cap-card[data-color="green"] .cap-card-icon { color: #7fdc7f; }
+.cap-card[data-color="pink"] .cap-card-icon { color: #ff9ec7; }
+
+/* Push title down to make room for icon */
+.cap-card-title {
+  margin-top: 28px;
+}
+
+/* ─── Mobile: native scroll-snap carousel ─── */
+@media (max-width: 768px) {
+  .capability-carousel {
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 16px;
+    padding: 80px 12% 24px;
+    perspective: none;
+    cursor: default;
+    scrollbar-width: none;
+  }
+  .capability-carousel::-webkit-scrollbar { display: none; }
+
+  .cap-card {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none !important;
+    opacity: 1 !important;
+    flex: 0 0 76%;
+    max-width: 76%;
+    padding: 36px 22px 22px;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
+
+  .cap-card.is-front .cap-card-dot { animation: none; }
+  .cap-card-icon { top: 22px; left: 22px; width: 24px; height: 24px; }
+  .cap-card-title { margin-top: 24px; font-size: 1.1rem; }
+  .cap-card-desc { font-size: 0.85rem; }
 }
