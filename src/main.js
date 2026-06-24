@@ -336,3 +336,14 @@ function startCapabilityCarousel() {
 
   requestAnimationFrame(frame)
 }
+// ─── Filter tabs for "other projects" ───
+document.querySelectorAll('.filter-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const filter = tab.dataset.filter
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t === tab))
+    document.querySelectorAll('.other-card').forEach(card => {
+      const matches = filter === 'all' || card.dataset.category === filter || card.dataset.category === filter.replace('banking-audit', 'banking') || card.dataset.category === filter.replace('banking-audit', 'audit')
+      card.classList.toggle('hidden', !matches)
+    })
+  })
+})

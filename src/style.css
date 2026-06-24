@@ -790,3 +790,559 @@ a {
   .cap-card-title { margin-top: 24px; font-size: 1.1rem; }
   .cap-card-desc { font-size: 0.85rem; }
 }
+/* ─── Planets Galaxy ─── */
+.planets-galaxy {
+  position: relative;
+  width: 100%;
+  min-height: 720px;
+  margin-top: 32px;
+}
+
+.planet {
+  position: absolute;
+  left: var(--planet-x);
+  top: var(--planet-y);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.planet:hover {
+  transform: translateY(-6px) scale(1.03);
+}
+
+/* Planet bodies — CSS radial-gradient spheres */
+.planet-body {
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+  transition: box-shadow 0.4s ease;
+}
+
+/* Sizes */
+.planet[data-size="sm"] .planet-body { width: 110px; height: 110px; }
+.planet[data-size="md"] .planet-body { width: 150px; height: 150px; }
+.planet[data-size="lg"] .planet-body { width: 190px; height: 190px; }
+.planet[data-size="xl"] .planet-body { width: 230px; height: 230px; }
+
+/* Color treatments — sphere with light from upper-left, halo from glow */
+.planet[data-color="amber"] .planet-body {
+  background: radial-gradient(circle at 30% 30%, #ffd089 0%, #ef9f27 40%, #8a5a14 100%);
+  box-shadow: 0 0 40px rgba(239, 159, 39, 0.45), 0 0 100px rgba(239, 159, 39, 0.2);
+}
+
+.planet[data-color="gray"] .planet-body {
+  background: radial-gradient(circle at 30% 30%, #c8c5bc 0%, #888780 45%, #3d3c38 100%);
+  box-shadow: 0 0 30px rgba(136, 135, 128, 0.35), 0 0 80px rgba(136, 135, 128, 0.15);
+}
+
+.planet[data-color="blue"] .planet-body {
+  background: radial-gradient(circle at 30% 30%, #9bc7ed 0%, #378add 45%, #1a4a7d 100%);
+  box-shadow: 0 0 40px rgba(55, 138, 221, 0.5), 0 0 100px rgba(55, 138, 221, 0.22);
+}
+
+.planet[data-color="green"] .planet-body {
+  background: radial-gradient(circle at 30% 30%, #b0d987 0%, #639922 45%, #324e10 100%);
+  box-shadow: 0 0 40px rgba(99, 153, 34, 0.45), 0 0 100px rgba(99, 153, 34, 0.2);
+}
+
+.planet[data-color="purple"] .planet-body {
+  background: radial-gradient(circle at 30% 30%, #bfb8ee 0%, #7f77dd 45%, #423d80 100%);
+  box-shadow: 0 0 50px rgba(127, 119, 221, 0.55), 0 0 120px rgba(127, 119, 221, 0.25);
+}
+
+.planet[data-color="teal"] .planet-body {
+  background: radial-gradient(circle at 30% 30%, #7fcfb3 0%, #1d9e75 45%, #0d4a37 100%);
+  box-shadow: 0 0 35px rgba(29, 158, 117, 0.45), 0 0 90px rgba(29, 158, 117, 0.2);
+}
+
+.planet:hover .planet-body {
+  box-shadow:
+    0 0 60px var(--planet-glow, rgba(255,255,255,0.4)),
+    0 0 140px var(--planet-glow-soft, rgba(255,255,255,0.18));
+}
+
+/* Info under the planet */
+.planet-info {
+  text-align: center;
+  margin-top: 18px;
+  max-width: 220px;
+}
+
+.planet-tag {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(240, 236, 228, 0.5);
+  margin: 0 0 6px;
+}
+
+.planet-name {
+  font-family: 'Georgia', 'Cambria', 'Times New Roman', serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #f0ece4;
+  margin: 0 0 6px;
+  line-height: 1.2;
+}
+
+.planet-desc {
+  font-size: 0.78rem;
+  color: rgba(240, 236, 228, 0.55);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Subtle drift animation — different timing per planet so they don't move in sync */
+.planets-galaxy .planet:nth-child(1) .planet-body { animation: planet-drift 14s ease-in-out infinite; }
+.planets-galaxy .planet:nth-child(2) .planet-body { animation: planet-drift 18s ease-in-out infinite 1s; }
+.planets-galaxy .planet:nth-child(3) .planet-body { animation: planet-drift 16s ease-in-out infinite 0.5s; }
+.planets-galaxy .planet:nth-child(4) .planet-body { animation: planet-drift 20s ease-in-out infinite 2s; }
+.planets-galaxy .planet:nth-child(5) .planet-body { animation: planet-drift 15s ease-in-out infinite 0.8s; }
+.planets-galaxy .planet:nth-child(6) .planet-body { animation: planet-drift 22s ease-in-out infinite 1.5s; }
+
+@keyframes planet-drift {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+
+/* ─── Mobile: horizontal swipe scroll-snap (like capability cards) ─── */
+@media (max-width: 768px) {
+  .planets-galaxy {
+    min-height: 0;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 16px;
+    padding: 24px 12%;
+    scrollbar-width: none;
+  }
+  .planets-galaxy::-webkit-scrollbar { display: none; }
+
+  .planet {
+    position: relative;
+    left: auto;
+    top: auto;
+    flex: 0 0 76%;
+    max-width: 76%;
+    scroll-snap-align: center;
+    padding: 24px 0;
+  }
+
+  /* Equalize sizes on mobile — all same size, easier to scan */
+  .planet[data-size="sm"] .planet-body,
+  .planet[data-size="md"] .planet-body,
+  .planet[data-size="lg"] .planet-body,
+  .planet[data-size="xl"] .planet-body {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+/* Hide the old "View All Projects" button if you want to keep it, keep as-is */
+/* ─── Work Section: Featured Planets ─── */
+
+/* Capability strip */
+.work-capabilities {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin: 40px 0 60px;
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.work-cap {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 0;
+}
+
+.work-cap svg {
+  width: 20px;
+  height: 20px;
+  color: rgba(167, 123, 255, 0.6);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.work-cap h4 {
+  font-family: 'Georgia', serif;
+  font-size: 0.92rem;
+  font-weight: 500;
+  margin: 0 0 4px;
+  color: #f0ece4;
+  letter-spacing: -0.01em;
+}
+
+.work-cap p {
+  font-size: 0.76rem;
+  color: rgba(240, 236, 228, 0.55);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Planets row */
+.planets-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.planet-feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.planet-orbit {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+}
+
+.planet-img {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  animation: planet-spin 60s linear infinite;
+  z-index: 2;
+  position: relative;
+}
+
+/* Ring around planet, tilted, spinning at different speed */
+.planet-ring {
+  position: absolute;
+  width: 240px;
+  height: 70px;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  transform: rotate(-18deg);
+  animation: ring-spin 80s linear infinite;
+  z-index: 1;
+}
+
+.planet-feature[data-color="purple"] .planet-ring { border-color: rgba(181, 145, 255, 0.35); }
+.planet-feature[data-color="blue"] .planet-ring { border-color: rgba(106, 184, 255, 0.35); }
+.planet-feature[data-color="green"] .planet-ring { border-color: rgba(127, 220, 127, 0.35); }
+.planet-feature[data-color="amber"] .planet-ring { border-color: rgba(255, 175, 88, 0.4); }
+
+@keyframes planet-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ring-spin {
+  from { transform: rotate(-18deg); }
+  to { transform: rotate(342deg); }
+}
+
+/* Number badge */
+.planet-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: grid;
+  place-items: center;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: rgba(240, 236, 228, 0.7);
+  margin-bottom: 12px;
+  background: rgba(15, 17, 30, 0.6);
+}
+
+.planet-feature[data-color="purple"] .planet-number { border-color: rgba(181, 145, 255, 0.5); }
+.planet-feature[data-color="blue"] .planet-number { border-color: rgba(106, 184, 255, 0.5); }
+.planet-feature[data-color="green"] .planet-number { border-color: rgba(127, 220, 127, 0.5); }
+.planet-feature[data-color="amber"] .planet-number { border-color: rgba(255, 175, 88, 0.5); }
+
+.planet-tag {
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+  opacity: 0.7;
+}
+
+.planet-feature[data-color="purple"] .planet-tag { color: #b591ff; }
+.planet-feature[data-color="blue"] .planet-tag { color: #6ab8ff; }
+.planet-feature[data-color="green"] .planet-tag { color: #7fdc7f; }
+.planet-feature[data-color="amber"] .planet-tag { color: #ffaf58; }
+
+.planet-name {
+  font-family: 'Georgia', serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #f0ece4;
+  margin: 0 0 18px;
+  line-height: 1.2;
+}
+
+/* Card below planet */
+.planet-card {
+  background: linear-gradient(180deg, rgba(20, 22, 38, 0.85) 0%, rgba(12, 14, 26, 0.92) 100%);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 16px;
+  width: 100%;
+  text-align: left;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.4s ease;
+}
+
+.planet-feature:hover .planet-card {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.planet-screenshot {
+  width: 100%;
+  aspect-ratio: 16/10;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  color: rgba(240, 236, 228, 0.4);
+  margin-bottom: 12px;
+  font-family: 'Georgia', serif;
+}
+
+.planet-screenshot[data-color="purple"] { background: linear-gradient(135deg, rgba(127, 119, 221, 0.18), rgba(127, 119, 221, 0.06)); }
+.planet-screenshot[data-color="blue"] { background: linear-gradient(135deg, rgba(55, 138, 221, 0.18), rgba(55, 138, 221, 0.06)); }
+.planet-screenshot[data-color="green"] { background: linear-gradient(135deg, rgba(99, 153, 34, 0.2), rgba(99, 153, 34, 0.06)); }
+.planet-screenshot[data-color="amber"] { background: linear-gradient(135deg, rgba(239, 159, 39, 0.2), rgba(239, 159, 39, 0.06)); }
+
+.planet-desc {
+  font-size: 0.82rem;
+  color: rgba(240, 236, 228, 0.65);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.planet-link {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #a77bff;
+}
+
+.planet-feature[data-color="blue"] .planet-link { color: #6ab8ff; }
+.planet-feature[data-color="green"] .planet-link { color: #7fdc7f; }
+.planet-feature[data-color="amber"] .planet-link { color: #ffaf58; }
+
+.planets-dots { display: none; }
+
+/* Other projects with filter */
+.other-projects {
+  margin-top: 80px;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  padding: 8px 18px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: rgba(240, 236, 228, 0.65);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.filter-tab:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #f0ece4;
+}
+
+.filter-tab.active {
+  background: rgba(167, 123, 255, 0.18);
+  border-color: rgba(167, 123, 255, 0.5);
+  color: #f0ece4;
+}
+
+.other-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.other-card {
+  background: rgba(20, 22, 38, 0.4);
+  border: 0.5px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 18px 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.4s ease, background 0.4s ease, border-color 0.4s ease;
+  display: block;
+}
+
+.other-card:hover {
+  transform: translateY(-3px);
+  background: rgba(20, 22, 38, 0.6);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.other-card.hidden {
+  display: none;
+}
+
+.other-tag {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(167, 123, 255, 0.7);
+  margin: 0 0 6px;
+}
+
+.other-name {
+  font-family: 'Georgia', serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #f0ece4;
+  margin: 0 0 8px;
+}
+
+.other-desc {
+  font-size: 0.78rem;
+  color: rgba(240, 236, 228, 0.55);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Testimonials strip */
+.work-testimonials {
+  margin-top: 80px;
+  padding: 40px 32px;
+  background: linear-gradient(180deg, rgba(167, 123, 255, 0.06), rgba(167, 123, 255, 0.02));
+  border-left: 2px solid rgba(167, 123, 255, 0.4);
+  border-radius: 4px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.work-quote p {
+  font-family: 'Georgia', serif;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #f0ece4;
+  margin: 0 0 20px;
+  font-style: italic;
+}
+
+.work-quote cite {
+  display: block;
+  font-style: normal;
+}
+
+.work-quote cite strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #f0ece4;
+  margin-bottom: 2px;
+}
+
+.work-quote cite span {
+  font-size: 0.78rem;
+  color: rgba(240, 236, 228, 0.55);
+}
+
+/* CTA */
+.work-cta {
+  text-align: center;
+  margin-top: 80px;
+  padding: 48px 24px;
+}
+
+.work-cta h3 {
+  font-family: 'Georgia', serif;
+  font-size: 1.75rem;
+  font-weight: 500;
+  margin: 0 0 8px;
+  color: #f0ece4;
+}
+
+.work-cta p {
+  font-size: 1rem;
+  color: rgba(240, 236, 228, 0.65);
+  margin: 0 0 24px;
+}
+
+/* ─── Mobile responsiveness ─── */
+@media (max-width: 768px) {
+  .work-capabilities {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 16px;
+    margin: 32px 0 48px;
+  }
+
+  /* Planets become horizontal scroll */
+  .planets-row {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 20px;
+    padding: 0 12%;
+    scrollbar-width: none;
+  }
+  .planets-row::-webkit-scrollbar { display: none; }
+
+  .planet-feature {
+    flex: 0 0 76%;
+    max-width: 76%;
+    scroll-snap-align: center;
+  }
+
+  .planet-orbit { width: 160px; height: 160px; }
+  .planet-img { width: 140px; height: 140px; }
+  .planet-ring { width: 200px; height: 56px; }
+
+  .other-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .work-testimonials {
+    margin: 60px 16px 0;
+    padding: 28px 24px;
+  }
+
+  .work-quote p { font-size: 1rem; }
+
+  .work-cta h3 { font-size: 1.4rem; }
+}
