@@ -322,7 +322,6 @@ a {
   top: 0;
   left: 0;
   max-width: 320px;
-  will-change: transform;
   padding: 14px 38px 14px 18px;
   background: rgba(15, 17, 30, 0.35);
   backdrop-filter: blur(40px) saturate(180%);
