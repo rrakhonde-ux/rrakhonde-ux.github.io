@@ -3,10 +3,37 @@ import { initStarfield } from './starfield.js'
 import { initAstronaut } from './astronaut.js'
 import { initBubble, say } from './bubble.js'
 
+// ─── Page Loader ───
+function createLoader() {
+  const loader = document.createElement('div')
+  loader.id = 'page-loader'
+  loader.innerHTML = `
+    <div class="loader-inner">
+      <img src="/astronaut_loader.png" class="loader-astronaut" alt="astronaut"/>
+      <div class="loader-star"></div>
+      <p class="loader-text">Preparing your cosmic tour…</p>
+    </div>
+  `
+  document.body.appendChild(loader)
+  return loader
+}
+
+function hideLoader(loader) {
+  loader.classList.add('fade-out')
+  setTimeout(() => {
+    loader.style.display = 'none'
+  }, 600)
+}
+
+const loader = createLoader()
+const minDelay = new Promise(resolve => setTimeout(resolve, 2000))
+
 initStarfield()
 initBubble()
 
-initAstronaut().then(() => {
+Promise.all([initAstronaut(), minDelay]).then(() => {
+  hideLoader(loader)
+
   const canvas = document.querySelector('#astronaut-canvas')
   if (canvas) {
     canvas.classList.add('wandering')
@@ -14,7 +41,7 @@ initAstronaut().then(() => {
   }
 
   setTimeout(() => {
-    if (window.innerWidth <= 768) return  // No bubble on mobile
+    if (window.innerWidth <= 768) return
     say([
       "Hello. I'm here to introduce someone.",
       "Meet Ritesh. Fourteen years of bridging design and business strategy.",
@@ -336,6 +363,7 @@ function startCapabilityCarousel() {
 
   requestAnimationFrame(frame)
 }
+
 // ─── Other projects: collapse + filter ───
 const INITIAL_VISIBLE = 4
 let isExpanded = false
@@ -349,10 +377,8 @@ function applyVisibility() {
     card.classList.toggle('hidden', !matchesFilter)
 
     if (currentFilter !== 'all') {
-      // Filter overrides collapse — show all matches
       card.classList.remove('collapsed-hidden')
     } else if (!isExpanded) {
-      // Show only first INITIAL_VISIBLE when collapsed + no filter
       const shouldHide = shown >= INITIAL_VISIBLE
       card.classList.toggle('collapsed-hidden', shouldHide)
       if (!shouldHide) shown++
@@ -361,7 +387,6 @@ function applyVisibility() {
     }
   })
 
-  // Show/hide the button — only relevant when filter is 'all'
   const btn = document.querySelector('#show-more-btn')
   if (btn) {
     btn.style.display = currentFilter === 'all' ? '' : 'none'
@@ -384,20 +409,17 @@ if (showBtn) {
     isExpanded = !isExpanded
     applyVisibility()
 
-    // Soft scroll behavior
     if (!wasExpanded) {
-      // Expanding: scroll so the first newly-revealed card sits at top of viewport
       setTimeout(() => {
         const cards = document.querySelectorAll('.other-card:not(.hidden)')
-        const firstNew = cards[INITIAL_VISIBLE]  // 5th card (index 4)
+        const firstNew = cards[INITIAL_VISIBLE]
         if (firstNew) {
           const rect = firstNew.getBoundingClientRect()
-          const offset = window.scrollY + rect.top - 100  // 100px from top (nav clearance)
+          const offset = window.scrollY + rect.top - 100
           window.scrollTo({ top: offset, behavior: 'smooth' })
         }
       }, 300)
     } else {
-      // Collapsing: scroll back to the collapsed area
       setTimeout(() => {
         const grid = document.querySelector('.other-grid')
         if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' })
