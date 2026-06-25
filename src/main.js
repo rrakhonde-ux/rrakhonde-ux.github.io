@@ -336,14 +336,74 @@ function startCapabilityCarousel() {
 
   requestAnimationFrame(frame)
 }
-// ─── Filter tabs for "other projects" ───
+// ─── Other projects: collapse + filter ───
+const INITIAL_VISIBLE = 4
+let isExpanded = false
+let currentFilter = 'all'
+
+function applyVisibility() {
+  const cards = Array.from(document.querySelectorAll('.other-card'))
+  let shown = 0
+  cards.forEach(card => {
+    const matchesFilter = currentFilter === 'all' || card.dataset.category === currentFilter
+    card.classList.toggle('hidden', !matchesFilter)
+
+    if (currentFilter !== 'all') {
+      // Filter overrides collapse — show all matches
+      card.classList.remove('collapsed-hidden')
+    } else if (!isExpanded) {
+      // Show only first INITIAL_VISIBLE when collapsed + no filter
+      const shouldHide = shown >= INITIAL_VISIBLE
+      card.classList.toggle('collapsed-hidden', shouldHide)
+      if (!shouldHide) shown++
+    } else {
+      card.classList.remove('collapsed-hidden')
+    }
+  })
+
+  // Show/hide the button — only relevant when filter is 'all'
+  const btn = document.querySelector('#show-more-btn')
+  if (btn) {
+    btn.style.display = currentFilter === 'all' ? '' : 'none'
+    btn.textContent = isExpanded ? 'Show less' : 'Show all'
+  }
+}
+
 document.querySelectorAll('.filter-tab').forEach(tab => {
   tab.addEventListener('click', () => {
-    const filter = tab.dataset.filter
+    currentFilter = tab.dataset.filter
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t === tab))
-    document.querySelectorAll('.other-card').forEach(card => {
-      const matches = filter === 'all' || card.dataset.category === filter || card.dataset.category === filter.replace('banking-audit', 'banking') || card.dataset.category === filter.replace('banking-audit', 'audit')
-      card.classList.toggle('hidden', !matches)
-    })
+    applyVisibility()
   })
 })
+
+const showBtn = document.querySelector('#show-more-btn')
+if (showBtn) {
+  showBtn.addEventListener('click', () => {
+    const wasExpanded = isExpanded
+    isExpanded = !isExpanded
+    applyVisibility()
+
+    // Soft scroll behavior
+    if (!wasExpanded) {
+      // Expanding: scroll so the first newly-revealed card sits at top of viewport
+      setTimeout(() => {
+        const cards = document.querySelectorAll('.other-card:not(.hidden)')
+        const firstNew = cards[INITIAL_VISIBLE]  // 5th card (index 4)
+        if (firstNew) {
+          const rect = firstNew.getBoundingClientRect()
+          const offset = window.scrollY + rect.top - 100  // 100px from top (nav clearance)
+          window.scrollTo({ top: offset, behavior: 'smooth' })
+        }
+      }, 300)
+    } else {
+      // Collapsing: scroll back to the collapsed area
+      setTimeout(() => {
+        const grid = document.querySelector('.other-grid')
+        if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+    }
+  })
+}
+
+applyVisibility()
