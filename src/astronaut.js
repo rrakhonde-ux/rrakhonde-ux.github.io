@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 
 export function initAstronaut() {
   return new Promise((resolve) => {
@@ -27,10 +28,10 @@ export function initAstronaut() {
   container.appendChild(renderer.domElement)
 
   // ─── Lights ───
-  const ambient = new THREE.AmbientLight(0xffffff, 0.6)
+  const ambient = new THREE.AmbientLight(0xffffff, 1.6)
   scene.add(ambient)
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.2)
+  const keyLight = new THREE.DirectionalLight(0xffffff, 2.2)
   keyLight.position.set(3, 4, 5)
   scene.add(keyLight)
 
@@ -39,7 +40,12 @@ export function initAstronaut() {
   scene.add(rimLight)
 
   // ─── Load the astronaut ───
+  const dracoLoader = new DRACOLoader()
+  dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/')
+
   const loader = new GLTFLoader()
+  loader.setDRACOLoader(dracoLoader)
+
   let astronaut = null
   let mixer = null
 
@@ -49,7 +55,7 @@ export function initAstronaut() {
   let lookOverride = null  // {x, y} in -1..1 range to force gaze at a fixed point
 
   loader.load(
-    '/astronaut.glb',
+    '/astronaut_draco.glb',
     (gltf) => {
       astronaut = gltf.scene
 
@@ -90,7 +96,8 @@ export function initAstronaut() {
       console.error('❌ Astronaut failed to load:', error)
     }
   )
-    // ─── Mouse tracking ───
+
+  // ─── Mouse tracking ───
   window.addEventListener('mousemove', (e) => {
     // Convert screen position to -1..+1 range
     mouseTarget.x = (e.clientX / window.innerWidth - 0.5) * 2
