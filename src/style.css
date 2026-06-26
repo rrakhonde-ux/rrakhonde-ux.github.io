@@ -1484,8 +1484,8 @@ a {
 .planet-canvas {
   position: absolute;
   inset: 0;
-  width: 180px;
-  height: 180px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
   z-index: 4;
   opacity: 0;

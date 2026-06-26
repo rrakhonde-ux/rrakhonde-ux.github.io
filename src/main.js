@@ -278,7 +278,7 @@ function startCapabilityCarousel() {
   const CYCLE_MS = 40000
   const FRONT_BAND = 1.0
   const ARC_HEIGHT = 90
-  const ARC_WIDTH_FACTOR = 0.55
+  const ARC_WIDTH_PX = 380  // fixed horizontal spread, no longer % of carousel width
 
   let lastTime = performance.now()
   let progress = 0
@@ -330,7 +330,7 @@ function startCapabilityCarousel() {
         const frontT = t / FRONT_BAND
         const u = -1 + frontT * 2
 
-        x = -u * w * ARC_WIDTH_FACTOR
+        x = -u * ARC_WIDTH_PX
         y = ARC_HEIGHT * (1 - u * u)
         scale = 0.85 + (1 - Math.abs(u)) * 0.15
 

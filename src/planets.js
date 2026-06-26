@@ -50,7 +50,7 @@ const RIM_COLORS = {
   amber: new THREE.Color(0xffc080),
 }
 
-const SIZE = 180
+const SIZE = 200
 
 // ─── Fresnel rim shader ──────────────────────────────────────────────
 
@@ -82,11 +82,12 @@ const RIM_FRAGMENT = `
 export function initPlanets() {
   return new Promise((resolve) => {
     if (!isCapable()) {
-      document.querySelectorAll('.planet-img').forEach((img) => {
-        img.style.display = 'block'
-      })
-      resolve()
-      return
+        document.querySelectorAll('.planet-img').forEach((img) => {
+            if (img.dataset.src) img.src = img.dataset.src
+            img.style.display = 'block'
+        })
+        resolve()
+        return
     }
 
     const wrappers = collectWrappers()
@@ -106,7 +107,7 @@ export function initPlanets() {
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 10)
-    camera.position.set(0, 0, 3.2)
+    camera.position.set(0, 0, 4.3)
 
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.0)
     keyLight.position.set(-2, 2.5, 2)
@@ -230,9 +231,7 @@ function buildPlanet({ feature, orbit, img, canvas, color }, planetGeo, atmosGeo
     roughness: 1.0,
     metalness: 0.0,
     color: PLANET_TINTS[color],
-    emissive: PLANET_TINTS[color],
-    emissiveIntensity: 0.15,
-  })
+   })
 
   const texturePromise = new Promise((resolve) => {
     textureLoader.load(PLANET_TEXTURES[color], (texture) => {
@@ -250,7 +249,7 @@ function buildPlanet({ feature, orbit, img, canvas, color }, planetGeo, atmosGeo
   const atmoMaterial = new THREE.ShaderMaterial({
     uniforms: {
       rimColor: { value: RIM_COLORS[color] },
-      rimIntensity: { value: 0.55 },
+      rimIntensity: { value: 0.0 },
     },
     vertexShader: RIM_VERTEX,
     fragmentShader: RIM_FRAGMENT,
