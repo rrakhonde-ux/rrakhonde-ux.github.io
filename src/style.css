@@ -1039,6 +1039,7 @@ a {
 }
 
 .planet-img {
+  display: none;
   width: 180px;
   height: 180px;
   border-radius: 50%;
@@ -1049,6 +1050,7 @@ a {
 
 /* Ring around planet, tilted, spinning at different speed */
 .planet-ring {
+  display: none;
   position: absolute;
   width: 240px;
   height: 240px;
@@ -1477,4 +1479,28 @@ a {
 @keyframes loader-pulse {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.4); opacity: 0.6; }
+}
+/* Planet canvas — sits on top of the static PNG, only shown when WebGL renders */
+.planet-canvas {
+  position: absolute;
+  inset: 0;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.planet-canvas.active {
+  opacity: 1;
+}
+
+/* When canvas is active, hide the static PNG below */
+.planet-orbit:has(.planet-canvas.active) .planet-img {
+  opacity: 0;
+}
+.planet-ring {
+  z-index: 5 !important;
 }

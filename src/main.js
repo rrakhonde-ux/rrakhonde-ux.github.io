@@ -2,6 +2,7 @@ import './style.css'
 import { initStarfield } from './starfield.js'
 import { initAstronaut } from './astronaut.js'
 import { initBubble, say } from './bubble.js'
+import { initPlanets } from './planets.js'
 
 // ─── Page Loader ───
 function createLoader() {
@@ -30,9 +31,16 @@ const minDelay = new Promise(resolve => setTimeout(resolve, 2000))
 
 initStarfield()
 initBubble()
+initPlanets()
 
 Promise.all([initAstronaut(), minDelay]).then(() => {
   hideLoader(loader)
+
+  // Reveal hero photo immediately on mobile (no intro bubble there)
+  if (window.innerWidth <= 768) {
+    const slot = document.querySelector('#hero-photo-slot')
+    if (slot) slot.classList.add('revealed')
+  }
 
   const canvas = document.querySelector('#astronaut-canvas')
   if (canvas) {
