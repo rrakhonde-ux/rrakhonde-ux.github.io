@@ -27,20 +27,28 @@ function hideLoader(loader) {
 }
 
 const loader = createLoader()
-const minDelay = new Promise(resolve => setTimeout(resolve, 2000))
+let loaderHidden = false
 
 initStarfield()
 initBubble()
 initPlanets()
 
-Promise.all([initAstronaut(), minDelay]).then(() => {
+function dismissLoader() {
+  if (loaderHidden) return
+  loaderHidden = true
   hideLoader(loader)
 
-  // Reveal hero photo immediately on mobile (no intro bubble there)
-  if (window.innerWidth <= 768) {
-    const slot = document.querySelector('#hero-photo-slot')
-    if (slot) slot.classList.add('revealed')
-  }
+  // Reveal hero photo immediately (especially important on mobile)
+  const slot = document.querySelector('#hero-photo-slot')
+  if (slot) slot.classList.add('revealed')
+}
+
+// Cap loader at 3 seconds regardless of astronaut load state
+setTimeout(dismissLoader, 3000)
+
+// When astronaut is ready, dismiss loader (if not already) and start animation
+initAstronaut().then(() => {
+  dismissLoader()
 
   const canvas = document.querySelector('#astronaut-canvas')
   if (canvas) {
