@@ -1,4 +1,5 @@
 import './style.css'
+import { initNebula } from './nebula.js'
 import { initStarfield } from './starfield.js'
 import { initAstronaut } from './astronaut.js'
 import { initBubble, say } from './bubble.js'
@@ -29,9 +30,42 @@ function hideLoader(loader) {
 const loader = createLoader()
 let loaderHidden = false
 
+const nebula = initNebula()
 initStarfield()
 initBubble()
 initPlanets()
+
+// ─── Micro parallax (desktop only) ───
+if (window.innerWidth > 768) {
+  let mouseX = 0, mouseY = 0
+  let currentX = 0, currentY = 0
+
+  window.addEventListener('mousemove', (e) => {
+    mouseX = (e.clientX / window.innerWidth - 0.5) * 2
+    mouseY = (e.clientY / window.innerHeight - 0.5) * 2
+  })
+
+  function parallaxTick() {
+    currentX += (mouseX - currentX) * 0.05
+    currentY += (mouseY - currentY) * 0.05
+
+    if (nebula && nebula.setParallax) nebula.setParallax(currentX, currentY)
+
+    const starfield = document.querySelector('#starfield')
+    if (starfield) {
+      starfield.style.transform = `translate(${currentX * -3.5}px, ${currentY * -3.5}px)`
+    }
+
+    const photo = document.querySelector('.hero-photo-slot')
+    if (photo) {
+      photo.style.setProperty('--parallax-x', `${currentX * -1.5}px`)
+      photo.style.setProperty('--parallax-y', `${currentY * -1.5}px`)
+    }
+
+    requestAnimationFrame(parallaxTick)
+  }
+  parallaxTick()
+}
 
 function dismissLoader() {
   if (loaderHidden) return
